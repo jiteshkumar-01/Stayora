@@ -74,7 +74,7 @@
             </div>
             <div class="d-flex justify-content-between pt-3 fw-bold fs-5 text-dark">
               <span>Total Paid</span>
-              <span class="text-primary">₹<%= booking.totalAmount.toLocaleString("en-IN") %></span>
+              <span class="text-primary">₹<%= Number(booking.totalAmount || 0).toLocaleString("en-IN") %></span>
             </div>
           </div>
 
