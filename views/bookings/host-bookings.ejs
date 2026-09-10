@@ -229,7 +229,7 @@
                   </td>
 
                   <td class="py-3 fw-bold text-dark">
-                    ₹<%= booking.totalAmount.toLocaleString("en-IN") %>
+                    ₹<%= Number(booking.totalAmount || 0).toLocaleString("en-IN") %>
                   </td>
 
                   <td class="py-3">
