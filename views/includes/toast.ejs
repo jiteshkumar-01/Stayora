@@ -1,0 +1,67 @@
+<!-- Shared Global Toast Partial -->
+<% if (
+  (typeof success !== 'undefined' && success && success.length) || 
+  (typeof error !== 'undefined' && error && error.length) ||
+  (typeof warning !== 'undefined' && warning && warning.length) ||
+  (typeof info !== 'undefined' && info && info.length)
+) { %>
+  <div class="toast-container-custom">
+    
+    <% if (typeof success !== 'undefined' && success && success.length) { %>
+      <% success.forEach(function(msg) { %>
+        <div class="toast show align-items-center text-white bg-dark border-0 shadow-lg rounded-3 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
+              <i class="fa-solid fa-circle-check text-success fs-5"></i>
+              <span class="fw-semibold"><%= msg %></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error && error.length) { %>
+      <% error.forEach(function(msg) { %>
+        <div class="toast show align-items-center text-white bg-danger border-0 shadow-lg rounded-3 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
+              <i class="fa-solid fa-circle-exclamation fs-5"></i>
+              <span class="fw-semibold"><%= msg %></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+    <% if (typeof warning !== 'undefined' && warning && warning.length) { %>
+      <% warning.forEach(function(msg) { %>
+        <div class="toast show align-items-center text-dark bg-warning border-0 shadow-lg rounded-3 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
+              <i class="fa-solid fa-triangle-exclamation fs-5"></i>
+              <span class="fw-semibold"><%= msg %></span>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+    <% if (typeof info !== 'undefined' && info && info.length) { %>
+      <% info.forEach(function(msg) { %>
+        <div class="toast show align-items-center text-white bg-dark border-0 shadow-lg rounded-3 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
+              <i class="fa-solid fa-info-circle text-info fs-5"></i>
+              <span class="fw-semibold"><%= msg %></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+  </div>
+<% } %>

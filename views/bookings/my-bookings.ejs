@@ -1,0 +1,92 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  
+  <div class="dashboard-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h2 class="fw-extrabold text-dark m-0">My Trips & Bookings</h2>
+      <p class="text-muted m-0">Manage your upcoming and past property reservations.</p>
+    </div>
+    <a href="/listings" class="btn btn-outline-custom rounded-pill">
+      <i class="fa-solid fa-magnifying-glass me-1"></i> Explore more stays
+    </a>
+  </div>
+
+  <% if (!bookings || !bookings.length) { %>
+    <!-- Empty Bookings State -->
+    <div class="text-center py-5 my-4 bg-white rounded-4 border p-5 shadow-sm">
+      <div class="mb-4 text-muted opacity-50">
+        <i class="fa-solid fa-suitcase-rolling display-1"></i>
+      </div>
+      <h3 class="fw-bold">No bookings yet</h3>
+      <p class="text-muted max-w-md mx-auto mb-4">Time to dust off your bags and start planning your next great getaway.</p>
+      <a href="/listings" class="btn btn-primary-custom rounded-pill px-4 py-3">
+        Start searching stays
+      </a>
+    </div>
+  <% } else { %>
+
+    <!-- Bookings Cards Grid -->
+    <div class="row g-4">
+      <% bookings.forEach(booking => { %>
+        <div class="col-lg-6">
+          <div class="booking-card-item">
+            
+            <div class="row g-0">
+              <div class="col-md-5 position-relative">
+                <% if (booking.listing && booking.listing.image && booking.listing.image.url) { %>
+                  <img src="<%= booking.listing.image.url %>" class="booking-card-img" alt="<%= booking.listing.title %>">
+                <% } else { %>
+                  <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=80" class="booking-card-img" alt="Listing unavailable">
+                <% } %>
+                
+                <div class="position-absolute top-0 start-0 m-3">
+                  <span class="booking-status-badge <%= booking.bookingStatus === 'confirmed' ? 'badge-confirmed' : 'badge-cancelled' %>">
+                    <%= booking.bookingStatus %>
+                  </span>
+                </div>
+              </div>
+
+              <div class="col-md-7">
+                <div class="p-4 d-flex flex-column justify-content-between h-100">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-1">
+                      <%= booking.listing ? booking.listing.title : "Listing unavailable" %>
+                    </h5>
+                    <% if (booking.listing) { %>
+                      <p class="text-muted small mb-2"><%= booking.listing.location %>, <%= booking.listing.country %></p>
+                    <% } %>
+
+                    <div class="small text-muted mb-2">
+                      <i class="fa-regular fa-calendar me-1"></i>
+                      <%= new Date(booking.checkIn).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' }) %> - 
+                      <%= new Date(booking.checkOut).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                    </div>
+
+                    <div class="small text-muted mb-3">
+                      <i class="fa-solid fa-user-group me-1"></i> <%= booking.guests %> <%= booking.guests === 1 ? 'guest' : 'guests' %> · 
+                      <span class="fw-bold text-dark">₹<%= booking.totalAmount.toLocaleString("en-IN") %></span> total
+                    </div>
+                  </div>
+
+                  <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                    <span class="badge <%= booking.paymentStatus === 'paid' ? 'badge-paid' : 'bg-secondary' %>">
+                      Payment: <%= booking.paymentStatus %>
+                    </span>
+                    <a href="/bookings/<%= booking._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-semibold">
+                      View receipt <i class="fa-solid fa-chevron-right ms-1 small"></i>
+                    </a>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+  <% } %>
+
+</div>

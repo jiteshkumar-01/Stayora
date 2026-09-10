@@ -1,0 +1,163 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-split-wrapper">
+  
+  <!-- Visual Left Side -->
+  <div class="auth-visual-side" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80');">
+    <div class="auth-visual-overlay"></div>
+    <div class="auth-visual-content">
+      <div class="d-flex align-items-center gap-2 mb-3 fs-4 fw-extrabold text-white">
+        <i class="fa-solid fa-compass text-danger fs-2"></i> wanderlust
+      </div>
+      <div class="auth-visual-quote">
+        "Start your adventure with Wanderlust today."
+      </div>
+      <p class="text-white-50 small m-0">Create an account to save wishlist properties, book stays, and host your home.</p>
+    </div>
+  </div>
+
+  <!-- Form Right Side -->
+  <div class="auth-form-side">
+    <div class="auth-form-card">
+      
+      <div class="mb-4 text-center text-lg-start">
+        <h2 class="auth-form-title">Create your account</h2>
+        <p class="auth-form-subtitle">Join Wanderlust to unlock memorable travel experiences.</p>
+      </div>
+
+      <form action="/signup" method="POST" class="needs-validation" novalidate id="signup-form">
+        
+        <div class="custom-form-group mb-3">
+          <label for="username" class="custom-form-label">Username</label>
+          <input
+            name="username"
+            type="text"
+            placeholder="Choose a unique username"
+            id="username"
+            class="custom-form-input"
+            required
+          />
+          <div class="invalid-feedback">Please choose a username.</div>
+        </div>
+
+        <div class="custom-form-group mb-3">
+          <label for="email" class="custom-form-label">Email Address</label>
+          <input
+            name="email"
+            type="email"
+            placeholder="name@example.com"
+            id="email"
+            class="custom-form-input"
+            required
+          />
+          <div class="invalid-feedback">Please enter a valid email address.</div>
+        </div>
+
+        <div class="custom-form-group mb-3">
+          <label for="password" class="custom-form-label">Password</label>
+          <div class="position-relative">
+            <input
+              name="password"
+              type="password"
+              placeholder="At least 8 characters"
+              id="password"
+              class="custom-form-input pe-5"
+              minlength="8"
+              required
+            />
+            <button type="button" class="btn btn-link text-muted position-absolute end-0 top-50 translate-middle-y text-decoration-none px-3 border-0 bg-transparent" id="togglePasswordBtn" aria-label="Toggle password visibility">
+              <i class="fa-regular fa-eye" id="togglePasswordIcon"></i>
+            </button>
+          </div>
+          
+          <!-- Password Requirements -->
+          <div class="mt-2 text-muted small">
+            <div class="d-flex align-items-center gap-1" id="req-length">
+              <i class="fa-solid fa-circle-check text-secondary" id="req-length-icon"></i>
+              <span>At least 8 characters long</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="custom-form-group mb-3">
+          <label for="confirmPassword" class="custom-form-label">Confirm Password</label>
+          <input
+            type="password"
+            placeholder="Re-enter your password"
+            id="confirmPassword"
+            class="custom-form-input"
+            required
+          />
+          <div class="invalid-feedback" id="confirmPasswordFeedback">Please confirm your password.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary-custom w-100 py-3 rounded-pill fw-bold text-uppercase fs-6 mt-3" id="signup-submit-btn" style="letter-spacing: 0.04em;">
+          <span>Create Account</span>
+        </button>
+
+        <div class="text-center mt-4 text-muted small">
+          Already have an account? <a href="/login" class="fw-bold text-dark text-decoration-underline">Log in</a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const passwordInput = document.getElementById("password");
+    const confirmInput = document.getElementById("confirmPassword");
+    const toggleBtn = document.getElementById("togglePasswordBtn");
+    const toggleIcon = document.getElementById("togglePasswordIcon");
+    const form = document.getElementById("signup-form");
+    const submitBtn = document.getElementById("signup-submit-btn");
+
+    // Toggle Password Visibility
+    if (toggleBtn && passwordInput && toggleIcon) {
+      toggleBtn.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        toggleIcon.className = isPassword ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+      });
+    }
+
+    // Live Password Requirement Indicator
+    if (passwordInput) {
+      passwordInput.addEventListener("input", () => {
+        const isValid = passwordInput.value.length >= 8;
+        const icon = document.getElementById("req-length-icon");
+        if (icon) {
+          icon.className = isValid ? "fa-solid fa-circle-check text-success" : "fa-solid fa-circle-check text-secondary";
+        }
+      });
+    }
+
+    // Form Submit Handler & Confirm Password Check
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        let valid = true;
+
+        if (passwordInput.value !== confirmInput.value) {
+          confirmInput.setCustomValidity("Passwords do not match");
+          document.getElementById("confirmPasswordFeedback").textContent = "Passwords do not match.";
+          valid = false;
+        } else {
+          confirmInput.setCustomValidity("");
+        }
+
+        if (!form.checkValidity() || !valid) {
+          e.preventDefault();
+          e.stopPropagation();
+          form.classList.add("was-validated");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Creating account...';
+      });
+    }
+  });
+</script>

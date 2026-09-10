@@ -1,0 +1,138 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white">
+        
+        <div class="text-center mb-4">
+          <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-3 mb-2">
+            <i class="fa-solid fa-house-chimney-window fs-3"></i>
+          </div>
+          <h2 class="fw-extrabold text-dark">List your stay on Stayora</h2>
+          <p class="text-muted">Create a new listing and welcome guests to your unique property.</p>
+        </div>
+
+        <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data" id="create-listing-form">
+
+          <!-- Title -->
+          <div class="custom-form-group mb-4">
+            <label for="title" class="custom-form-label">Property Title</label>
+            <input name="listing[title]" type="text" id="title" class="custom-form-input" placeholder="e.g. Luxury Heritage Villa in Jaipur" required>
+            <div class="invalid-feedback">Please enter a property title.</div>
+          </div>
+
+          <!-- Category -->
+          <div class="custom-form-group mb-4">
+            <label for="category" class="custom-form-label">Category / Property Type</label>
+            <select name="listing[category]" id="category" class="form-select custom-form-input" required>
+              <option value="">Select a category</option>
+              <option value="Trending">🔥 Trending</option>
+              <option value="Rooms">🛌 Rooms</option>
+              <option value="Cities">🏙️ Cities</option>
+              <option value="Mountain">🏔️ Mountain</option>
+              <option value="Castles">🏰 Castles</option>
+              <option value="Pools">🏊 Pools</option>
+              <option value="Lakes">🌊 Lakes</option>
+              <option value="Beach">🏖️ Beach</option>
+              <option value="Camping">🏕️ Camping</option>
+              <option value="Domes">🛖 Domes</option>
+              <option value="Arictic">❄️ Arctic</option>
+              <option value="Boats">⛵ Boats</option>
+            </select>
+            <div class="invalid-feedback">Please select a category.</div>
+          </div>
+
+          <!-- Description -->
+          <div class="custom-form-group mb-4">
+            <label for="description" class="custom-form-label">Description</label>
+            <textarea name="listing[description]" id="description" class="custom-form-input" rows="4" placeholder="Describe what makes your stay special, key amenities, and nearby attractions..." required></textarea>
+            <div class="invalid-feedback">Please enter a description.</div>
+          </div>
+
+          <!-- Multiple Image Upload -->
+          <div class="custom-form-group mb-4">
+            <label for="images" class="custom-form-label">Add Photos (You can upload up to 10 photos)</label>
+            <input name="images" type="file" id="images" class="form-control custom-form-input" multiple accept="image/*" required>
+            <div class="form-text text-muted">Select high-resolution photos of bedrooms, living spaces, and exterior.</div>
+            <div class="invalid-feedback">Please select at least one photo.</div>
+
+            <!-- Image Preview Grid -->
+            <div id="image-preview-container" class="d-flex flex-wrap gap-2 mt-3"></div>
+          </div>
+
+          <!-- Price & Country -->
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label for="price" class="custom-form-label">Price per night (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 rounded-start-3">₹</span>
+                <input name="listing[price]" type="number" id="price" class="custom-form-input border-start-0 rounded-end-3" placeholder="4500" min="0" required>
+              </div>
+              <div class="invalid-feedback">Please enter a valid price.</div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label for="country" class="custom-form-label">Country</label>
+              <input name="listing[country]" type="text" id="country" class="custom-form-input" placeholder="e.g. India" required>
+              <div class="invalid-feedback">Please enter country.</div>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="custom-form-group mb-4">
+            <label for="location" class="custom-form-label">City / Location</label>
+            <input name="listing[location]" type="text" id="location" class="custom-form-input" placeholder="e.g. Jaipur, Rajasthan" required>
+            <div class="invalid-feedback">Please enter location details.</div>
+          </div>
+
+          <!-- Terms Checkbox -->
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="terms" required>
+            <label class="form-check-label text-muted small" for="terms">
+              I agree to Stayora terms and hosting policies.
+            </label>
+            <div class="invalid-feedback">You must agree before submitting.</div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary-custom w-100 py-3 rounded-pill fw-bold fs-6">
+            <i class="fa-solid fa-plus-circle me-1"></i> Publish Stay
+          </button>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Live Image Previews before submission
+  document.getElementById("images").addEventListener("change", function(e) {
+    const container = document.getElementById("image-preview-container");
+    container.innerHTML = "";
+    const files = Array.from(e.target.files);
+
+    if (files.length > 10) {
+      alert("You can upload a maximum of 10 photos.");
+      this.value = "";
+      return;
+    }
+
+    files.forEach((file) => {
+      if (!file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const div = document.createElement("div");
+        div.className = "position-relative rounded-3 overflow-hidden shadow-sm";
+        div.style.width = "90px";
+        div.style.height = "90px";
+        div.innerHTML = `<img src="${evt.target.result}" class="w-100 h-100 object-fit-cover">`;
+        container.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+</script>

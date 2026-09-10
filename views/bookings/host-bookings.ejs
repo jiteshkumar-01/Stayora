@@ -1,0 +1,256 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  
+  <div class="dashboard-header mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h2 class="fw-extrabold text-dark m-0">Host Dashboard</h2>
+      <p class="text-muted m-0">Manage your published stays on Stayora and track guest reservations.</p>
+    </div>
+    <a href="/listings/new" class="btn btn-primary-custom rounded-pill">
+      <i class="fa-solid fa-plus-circle me-1"></i> Add new stay
+    </a>
+  </div>
+
+  <!-- Dashboard Overview Metrics -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-4">
+            <i class="fa-solid fa-house-chimney"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Your Published Stays</div>
+            <div class="fs-4 fw-bold text-dark"><%= typeof ownedListings !== 'undefined' && ownedListings ? ownedListings.length : 0 %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-info-subtle text-info p-3 rounded-circle fs-4">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Total Reservations</div>
+            <div class="fs-4 fw-bold text-dark"><%= bookings ? bookings.length : 0 %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-success-subtle text-success p-3 rounded-circle fs-4">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Total Revenue</div>
+            <div class="fs-4 fw-bold text-dark">
+              ₹<%= bookings ? bookings.reduce((sum, b) => sum + (b.paymentStatus === 'paid' ? b.totalAmount : 0), 0).toLocaleString("en-IN") : '0' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-warning-subtle text-warning p-3 rounded-circle fs-4">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Guests Hosted</div>
+            <div class="fs-4 fw-bold text-dark">
+              <%= bookings ? bookings.reduce((sum, b) => sum + b.guests, 0) : 0 %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       SECTION 1: YOUR STAYS (Host's Own Listings)
+       ========================================================================== -->
+  <div class="mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <h3 class="fw-bold text-dark m-0">Your Stays</h3>
+        <p class="text-muted small m-0">Properties you have listed and host on Stayora</p>
+      </div>
+    </div>
+
+    <% if (typeof ownedListings !== 'undefined' && ownedListings && ownedListings.length > 0) { %>
+      <div class="row g-4">
+        <% ownedListings.forEach(listing => { 
+             let coverImg = (listing.images && listing.images.length > 0) ? listing.images[0].url : (listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80');
+        %>
+          <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
+              
+              <div class="position-relative" style="height: 200px;">
+                <img src="<%= coverImg %>" class="w-100 h-100 object-fit-cover" alt="<%= listing.title %>">
+                <div class="position-absolute top-0 end-0 m-3">
+                  <span class="badge bg-dark text-white rounded-pill px-3 py-2 fw-semibold">
+                    ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : '0' %> / night
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="fw-bold text-dark mb-1"><%= listing.title %></h5>
+                  <p class="text-muted small mb-2"><i class="fa-solid fa-location-dot me-1"></i> <%= listing.location %>, <%= listing.country %></p>
+                  <div class="badge bg-light text-secondary border rounded-pill mb-3">
+                    <%= listing.category || 'Unique stay' %>
+                  </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between pt-3 border-top gap-2">
+                  <a href="/listings/<%= listing._id %>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="fa-solid fa-eye me-1"></i> View
+                  </a>
+                  <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                    <i class="fa-solid fa-pen me-1"></i> Edit
+                  </a>
+                  
+                  <!-- Remove Stay Modal Trigger -->
+                  <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteModal-<%= listing._id %>">
+                    <i class="fa-solid fa-trash me-1"></i> Remove
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Delete Confirmation Modal for Listing -->
+          <div class="modal fade" id="deleteModal-<%= listing._id %>" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                  <h5 class="modal-title fw-bold text-dark">Remove this stay?</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                  <p class="text-muted m-0">Are you sure you want to remove <strong>"<%= listing.title %>"</strong> from Stayora? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                  <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                  <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Remove stay</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center py-4 bg-white rounded-4 border p-4 shadow-sm">
+        <p class="text-muted m-0 mb-2">You haven't listed any stays yet on Stayora.</p>
+        <a href="/listings/new" class="btn btn-primary-custom rounded-pill">Create your first stay</a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- ==========================================================================
+       SECTION 2: HOST RESERVATIONS
+       ========================================================================== -->
+  <div>
+    <h3 class="fw-bold text-dark mb-3">Host Reservations</h3>
+    
+    <% if (!bookings || !bookings.length) { %>
+      <div class="text-center py-5 bg-white rounded-4 border p-5 shadow-sm">
+        <div class="mb-3 text-muted opacity-50">
+          <i class="fa-solid fa-calendar-xmark display-2"></i>
+        </div>
+        <h4 class="fw-bold">No reservations received yet</h4>
+        <p class="text-muted max-w-md mx-auto mb-3">When guests book your stays, their reservation details and payment status will appear here.</p>
+      </div>
+    <% } else { %>
+
+      <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle m-0">
+            <thead class="table-light">
+              <tr>
+                <th class="py-3 px-4">Listing</th>
+                <th class="py-3">Guest Details</th>
+                <th class="py-3">Stay Dates</th>
+                <th class="py-3">Guests</th>
+                <th class="py-3">Total Paid</th>
+                <th class="py-3">Status</th>
+                <th class="py-3 text-end px-4">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% bookings.forEach(booking => { %>
+                <tr>
+                  <td class="py-3 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                      <% if (booking.listing && booking.listing.image && booking.listing.image.url) { %>
+                        <img src="<%= booking.listing.image.url %>" alt="" width="60" height="45" class="rounded-3 object-fit-cover">
+                      <% } %>
+                      <div>
+                        <div class="fw-bold text-dark"><%= booking.listing ? booking.listing.title : "Listing unavailable" %></div>
+                        <div class="text-muted small"><%= booking.listing ? booking.listing.location : "" %></div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="py-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                        <%= booking.user && booking.user.username ? booking.user.username[0].toUpperCase() : 'G' %>
+                      </div>
+                      <div>
+                        <div class="fw-semibold text-dark"><%= booking.user ? booking.user.username : "Guest" %></div>
+                        <small class="text-muted"><%= booking.user ? booking.user.email : "" %></small>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="py-3 small">
+                    <div class="fw-medium text-dark"><%= new Date(booking.checkIn).toLocaleDateString("en-IN") %></div>
+                    <div class="text-muted">to <%= new Date(booking.checkOut).toLocaleDateString("en-IN") %></div>
+                  </td>
+
+                  <td class="py-3 fw-medium">
+                    <%= booking.guests %> <%= booking.guests === 1 ? 'guest' : 'guests' %>
+                  </td>
+
+                  <td class="py-3 fw-bold text-dark">
+                    ₹<%= booking.totalAmount.toLocaleString("en-IN") %>
+                  </td>
+
+                  <td class="py-3">
+                    <span class="booking-status-badge <%= booking.bookingStatus === 'confirmed' ? 'badge-confirmed' : 'badge-cancelled' %>">
+                      <%= booking.bookingStatus %>
+                    </span>
+                  </td>
+
+                  <td class="py-3 text-end px-4">
+                    <a href="/bookings/<%= booking._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                      Details
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    <% } %>
+  </div>
+
+</div>

@@ -1,0 +1,106 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-split-wrapper">
+  
+  <!-- Visual Left Side -->
+  <div class="auth-visual-side">
+    <div class="auth-visual-overlay"></div>
+    <div class="auth-visual-content">
+      <div class="d-flex align-items-center gap-2 mb-3 fs-4 fw-extrabold text-white">
+        <i class="fa-solid fa-compass text-danger fs-2"></i> wanderlust
+      </div>
+      <div class="auth-visual-quote">
+        "Travel is the only thing you buy that makes you richer."
+      </div>
+      <p class="text-white-50 small m-0">Explore thousands of verified homes and unique stays worldwide.</p>
+    </div>
+  </div>
+
+  <!-- Form Right Side -->
+  <div class="auth-form-side">
+    <div class="auth-form-card">
+      
+      <div class="mb-4 text-center text-lg-start">
+        <h2 class="auth-form-title">Welcome back</h2>
+        <p class="auth-form-subtitle">Log in to your Wanderlust account to continue your trip.</p>
+      </div>
+
+      <form action="/login" method="POST" class="needs-validation" novalidate id="login-form">
+        
+        <div class="custom-form-group">
+          <label for="username" class="custom-form-label">Username</label>
+          <input
+            name="username"
+            type="text"
+            placeholder="Enter your username"
+            id="username"
+            class="custom-form-input"
+            required
+          />
+          <div class="invalid-feedback">Please enter your username.</div>
+        </div>
+
+        <div class="custom-form-group">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="password" class="custom-form-label mb-0">Password</label>
+          </div>
+          <div class="position-relative">
+            <input
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              id="password"
+              class="custom-form-input pe-5"
+              minlength="8"
+              required
+            />
+            <button type="button" class="btn btn-link text-muted position-absolute end-0 top-50 translate-middle-y text-decoration-none px-3 border-0 bg-transparent" id="togglePasswordBtn" aria-label="Toggle password visibility">
+              <i class="fa-regular fa-eye" id="togglePasswordIcon"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback">Please enter your password.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary-custom w-100 py-3 rounded-pill fw-bold text-uppercase fs-6 mt-3" id="login-submit-btn" style="letter-spacing: 0.04em;">
+          <span>Log In</span>
+        </button>
+
+        <div class="text-center mt-4 text-muted small">
+          Don't have an account? <a href="/signup" class="fw-bold text-dark text-decoration-underline">Sign up</a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Password visibility toggle
+    const toggleBtn = document.getElementById("togglePasswordBtn");
+    const passwordInput = document.getElementById("password");
+    const toggleIcon = document.getElementById("togglePasswordIcon");
+
+    if (toggleBtn && passwordInput && toggleIcon) {
+      toggleBtn.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        toggleIcon.className = isPassword ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+      });
+    }
+
+    // Submit loading state
+    const form = document.getElementById("login-form");
+    const submitBtn = document.getElementById("login-submit-btn");
+    if (form && submitBtn) {
+      form.addEventListener("submit", (e) => {
+        if (form.checkValidity()) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Logging in...';
+        }
+      });
+    }
+  });
+</script>

@@ -1,0 +1,459 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Starability Rating CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/starability/2.4.0/starability-all.min.css"/>
+
+<% 
+  // Normalize multi-image vs single-image array
+  let listingImages = (listing.images && listing.images.length > 0) 
+    ? listing.images 
+    : (listing.image && listing.image.url ? [listing.image] : [{ url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80' }]);
+  
+  let primaryImg = listingImages[0].url;
+%>
+
+<div class="detail-container">
+
+  <!-- ==========================================================================
+       1. HEADER & BREADCRUMBS
+       ========================================================================== -->
+  <div class="detail-header">
+    <div class="d-flex align-items-center gap-2 text-muted small mb-2">
+      <a href="/listings" class="text-muted hover-underline">Stayora</a>
+      <span>/</span>
+      <a href="/listings/search?country=<%= listing.country %>" class="text-muted hover-underline"><%= listing.country %></a>
+      <span>/</span>
+      <span class="text-dark fw-medium"><%= listing.location %></span>
+    </div>
+
+    <h1 class="detail-title"><%= listing.title %></h1>
+
+    <div class="detail-meta-bar">
+      <div class="detail-meta-left">
+        <span class="d-inline-flex align-items-center gap-1 text-dark fw-bold">
+          <i class="fa-solid fa-star text-warning"></i> 4.92
+        </span>
+        <span class="text-muted">·</span>
+        <span class="fw-semibold text-dark text-decoration-underline"><%= listing.reviews ? listing.reviews.length : 0 %> reviews</span>
+        <span class="text-muted">·</span>
+        <span class="badge bg-light text-dark border fw-semibold"><i class="fa-solid fa-award text-warning me-1"></i> Superhost</span>
+        <span class="text-muted">·</span>
+        <span class="text-muted"><%= listing.location %>, <%= listing.country %></span>
+      </div>
+
+      <div class="detail-actions">
+        <button class="detail-action-btn border-0 bg-transparent" onclick="navigator.clipboard.writeText(window.location.href); showToast('Link copied to clipboard!', 'success');">
+          <i class="fa-solid fa-share-nodes me-1"></i> Share
+        </button>
+        <% 
+          let isWishlisted = (typeof wishlistIds !== 'undefined' && wishlistIds && listing && listing._id) 
+            ? wishlistIds.includes(listing._id.toString()) 
+            : false;
+        %>
+        <button class="detail-action-btn border-0 bg-transparent <%= isWishlisted ? 'text-danger' : '' %>" id="save-wishlist-btn" onclick="toggleWishlist('<%= listing._id %>', this)">
+          <i class="<%= isWishlisted ? 'fa-solid fa-heart me-1 text-danger' : 'fa-regular fa-heart me-1' %>"></i> <%= isWishlisted ? 'Saved' : 'Save' %>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       2. MULTI-IMAGE GALLERY GRID
+       ========================================================================== -->
+  <div class="gallery-grid position-relative">
+    
+    <!-- Hero Main Image -->
+    <div class="gallery-item gallery-item-main" onclick="openLightbox(0)">
+      <img src="<%= primaryImg %>" alt="<%= listing.title %>" onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80'">
+    </div>
+
+    <!-- Secondary Images (up to 4) -->
+    <% for (let i = 1; i < 5; i++) { %>
+      <div class="gallery-item" onclick="openLightbox(<%= listingImages[i] ? i : 0 %>)">
+        <img src="<%= listingImages[i] ? listingImages[i].url : 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' %>" alt="Stay photo <%= i + 1 %>">
+      </div>
+    <% } %>
+
+    <!-- Show All Photos Button -->
+    <button type="button" class="btn btn-light rounded-pill position-absolute bottom-0 end-0 m-3 fw-bold shadow-sm px-3 py-2 border" onclick="openLightbox(0)">
+      <i class="fa-solid fa-grid me-2"></i> Show all <%= listingImages.length %> photos
+    </button>
+
+  </div>
+
+  <!-- ==========================================================================
+       3. MAIN LAYOUT (LEFT: PROPERTY INFO, RIGHT: STICKY BOOKING CARD)
+       ========================================================================== -->
+  <div class="detail-layout">
+    
+    <!-- LEFT COLUMN -->
+    <div>
+      
+      <!-- Host Header -->
+      <div class="host-profile-card">
+        <div>
+          <h3 class="fw-bold mb-1" style="font-size: 1.35rem;">
+            Entire <%= listing.category || 'villa' %> hosted by <%= listing.owner ? listing.owner.username : 'Host' %>
+          </h3>
+          <p class="text-muted m-0">8 guests · 4 bedrooms · 4 beds · 3.5 baths</p>
+        </div>
+        <div class="host-avatar-lg">
+          <%= listing.owner && listing.owner.username ? listing.owner.username[0].toUpperCase() : 'H' %>
+        </div>
+      </div>
+
+      <!-- Highlights -->
+      <div class="py-4 border-bottom">
+        <div class="d-flex gap-3 mb-3">
+          <i class="fa-solid fa-medal fs-4 text-dark mt-1"></i>
+          <div>
+            <div class="fw-bold"><%= listing.owner ? listing.owner.username : 'Host' %> is a Superhost</div>
+            <div class="text-muted small">Superhosts are experienced, highly rated hosts committed to great stays.</div>
+          </div>
+        </div>
+        <div class="d-flex gap-3 mb-3">
+          <i class="fa-solid fa-location-dot fs-4 text-dark mt-1"></i>
+          <div>
+            <div class="fw-bold">Great location</div>
+            <div class="text-muted small">95% of recent guests gave the location a 5-star rating.</div>
+          </div>
+        </div>
+        <div class="d-flex gap-3">
+          <i class="fa-solid fa-key fs-4 text-dark mt-1"></i>
+          <div>
+            <div class="fw-bold">Great check-in experience</div>
+            <div class="text-muted small">100% of recent guests gave the check-in process a 5-star rating.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="py-4 border-bottom">
+        <h4 class="fw-bold mb-3">About this place</h4>
+        <p class="text-secondary leading-relaxed" style="white-space: pre-line; font-size: 1rem;"><%= listing.description %></p>
+      </div>
+
+      <!-- Amenities -->
+      <div class="py-4 border-bottom">
+        <h4 class="fw-bold mb-3">What this place offers</h4>
+        <div class="amenities-grid">
+          <div class="amenity-item"><i class="fa-solid fa-wifi"></i> Fast Wi-Fi (300 Mbps)</div>
+          <div class="amenity-item"><i class="fa-solid fa-square-parking"></i> Free parking on premises</div>
+          <div class="amenity-item"><i class="fa-solid fa-person-swimming"></i> Private outdoor pool</div>
+          <div class="amenity-item"><i class="fa-solid fa-snowflake"></i> Air conditioning</div>
+          <div class="amenity-item"><i class="fa-solid fa-utensils"></i> Chef's kitchen</div>
+          <div class="amenity-item"><i class="fa-solid fa-laptop"></i> Dedicated workspace</div>
+          <div class="amenity-item"><i class="fa-solid fa-tv"></i> 65" HDTV with Netflix</div>
+          <div class="amenity-item"><i class="fa-solid fa-fire"></i> Hot water tub</div>
+        </div>
+      </div>
+
+      <!-- Owner Actions (Edit/Delete - Strictly Owner Only) -->
+      <% if (currUser && listing.owner && currUser._id.equals(listing.owner._id)) { %>
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 my-4">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+              <h5 class="fw-bold m-0"><i class="fa-solid fa-user-gear me-2"></i> Owner Controls</h5>
+              <small class="text-muted">You own this stay. You can edit details, add photos, or remove it.</small>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-dark rounded-pill px-4">Edit Listing</a>
+              <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#deleteOwnerModal">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Owner Delete Modal -->
+        <div class="modal fade" id="deleteOwnerModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+              <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark">Remove this stay?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body py-3">
+                <p class="text-muted m-0">Are you sure you want to delete <strong>"<%= listing.title %>"</strong> permanently? This action cannot be undone.</p>
+              </div>
+              <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline">
+                  <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Remove stay</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Map Container Section -->
+      <div class="py-4">
+        <h4 class="fw-bold mb-2">Where you'll be</h4>
+        <p class="text-muted small mb-3"><%= listing.location %>, <%= listing.country %></p>
+        <div class="rounded-4 overflow-hidden border shadow-sm" style="height: 340px;">
+          <iframe
+            width="100%"
+            height="100%"
+            style="border:0;"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q=<%= encodeURIComponent(listing.location + ', ' + listing.country) %>&z=13&output=embed">
+          </iframe>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: STICKY BOOKING CARD -->
+    <div>
+      <div class="booking-widget-card" id="booking-card">
+        
+        <div class="booking-widget-header">
+          <div>
+            <span class="booking-price-big">₹<%= listing.price ? listing.price.toLocaleString("en-IN") : '0' %></span>
+            <span class="booking-price-unit">/ night</span>
+          </div>
+          <div class="small fw-semibold text-dark">
+            <i class="fa-solid fa-star text-warning me-1"></i> 4.92 · <span class="text-muted text-decoration-underline"><%= listing.reviews ? listing.reviews.length : 0 %> reviews</span>
+          </div>
+        </div>
+
+        <% if (currUser && listing.owner && currUser._id.equals(listing.owner._id)) { %>
+          <div class="alert alert-info border-0 rounded-3 small">
+            <i class="fa-solid fa-circle-info me-1"></i> You own this stay. View reservations in your <a href="/bookings/host" class="fw-bold text-dark">Host Dashboard</a>.
+          </div>
+        <% } else { %>
+          
+          <form id="booking-form" data-listing-id="<%= listing._id %>" data-price="<%= listing.price %>" class="needs-validation" novalidate>
+            
+            <div class="booking-dates-box">
+              <div class="booking-date-inputs">
+                <div class="booking-date-field">
+                  <label for="booking-check-in" class="booking-date-label">Check-in</label>
+                  <input id="booking-check-in" type="date" class="booking-date-input" required>
+                </div>
+                <div class="booking-date-field">
+                  <label for="booking-check-out" class="booking-date-label">Checkout</label>
+                  <input id="booking-check-out" type="date" class="booking-date-input" required>
+                </div>
+              </div>
+              <div class="booking-guests-field">
+                <label for="booking-guests" class="booking-date-label d-block">Guests</label>
+                <select id="booking-guests" class="booking-date-input w-100" required>
+                  <option value="1">1 guest</option>
+                  <option value="2">2 guests</option>
+                  <option value="3">3 guests</option>
+                  <option value="4">4 guests</option>
+                  <option value="5">5+ guests</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="booking-breakdown">
+              <div class="booking-breakdown-row">
+                <span>₹<%= listing.price ? listing.price.toLocaleString("en-IN") : '0' %> × <span id="booking-nights">0</span> nights</span>
+                <span>₹<span id="booking-subtotal">0</span></span>
+              </div>
+              <div class="booking-breakdown-row">
+                <span>Cleaning fee</span>
+                <span>₹1,000</span>
+              </div>
+              <div class="booking-breakdown-row">
+                <span>Stayora service fee</span>
+                <span>₹750</span>
+              </div>
+              <div class="booking-total-row">
+                <span>Total before taxes</span>
+                <span>₹<span id="booking-total">0</span></span>
+              </div>
+            </div>
+
+            <div id="booking-error" class="alert alert-danger d-none py-2 px-3 small rounded-3" role="alert"></div>
+
+            <% if (!currUser) { %>
+              <p class="text-muted small text-center mb-2">You won't be charged yet. Login required.</p>
+            <% } %>
+
+            <button type="submit" id="book-now-button" class="btn btn-primary-custom w-100 py-3 rounded-pill fw-bold text-uppercase" style="letter-spacing: 0.05em;">
+              Reserve Stay
+            </button>
+
+          </form>
+
+        <% } %>
+
+        <div class="text-center mt-3 text-muted small">
+          <i class="fa-solid fa-lock me-1"></i> Secure payment powered by Razorpay
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==========================================================================
+       4. REVIEWS SECTION & REVIEW FORM
+       ========================================================================== -->
+  <div class="mt-5 pt-5 border-top">
+    
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <h3 class="fw-bold m-0"><i class="fa-solid fa-star text-warning me-2"></i> 4.92 · <%= listing.reviews ? listing.reviews.length : 0 %> Reviews</h3>
+    </div>
+
+    <% if (currUser) { %>
+      <div class="card border-0 bg-light rounded-4 p-4 mb-5 shadow-sm">
+        <h4 class="fw-bold mb-3">Leave a Review</h4>
+        <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
+          
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Overall Rating</label>
+            <fieldset class="starability-slot">
+              <input type="radio" id="rate1" name="review[rating]" value="1" required />
+              <label for="rate1" title="Terrible">1 star</label>
+              <input type="radio" id="rate2" name="review[rating]" value="2" />
+              <label for="rate2" title="Not good">2 stars</label>
+              <input type="radio" id="rate3" name="review[rating]" value="3" />
+              <label for="rate3" title="Average">3 stars</label>
+              <input type="radio" id="rate4" name="review[rating]" value="4" />
+              <label for="rate4" title="Very good">4 stars</label>
+              <input type="radio" id="rate5" name="review[rating]" value="5" checked />
+              <label for="rate5" title="Amazing">5 stars</label>
+            </fieldset>
+          </div>
+
+          <div class="mb-3">
+            <label for="review-comment" class="form-label fw-semibold text-dark">Your Feedback</label>
+            <textarea name="review[comment]" id="review-comment" class="form-control rounded-3 p-3" rows="3" placeholder="Share your experience staying at this place..." required></textarea>
+            <div class="invalid-feedback">Please write a comment.</div>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="agreeCheck" required>
+            <label class="form-check-label text-muted small" for="agreeCheck">
+              I certify that this review is based on my own genuine experience.
+            </label>
+            <div class="invalid-feedback">You must agree before submitting.</div>
+          </div>
+
+          <button type="submit" class="btn btn-dark rounded-pill px-4 fw-semibold">Submit Review</button>
+        </form>
+      </div>
+    <% } %>
+
+    <% if (listing.reviews && listing.reviews.length > 0) { %>
+      <div class="reviews-grid">
+        <% for (let review of listing.reviews) { %>
+          <div class="review-card-custom">
+            <div>
+              <div class="review-author-info">
+                <div class="user-avatar" style="width: 42px; height: 42px; font-size: 1rem;">
+                  <%= review.author && review.author.username ? review.author.username[0].toUpperCase() : 'U' %>
+                </div>
+                <div>
+                  <div class="fw-bold text-dark"><%= review.author ? review.author.username : 'Guest' %></div>
+                  <div class="text-muted small"><%= review.createdAt ? new Date(review.createdAt).toLocaleDateString("en-IN", { month: 'short', year: 'numeric' }) : 'Recent' %></div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <p class="starability-result m-0" data-rating="<%= review.rating %>">
+                  Rated: <%= review.rating %> stars
+                </p>
+              </div>
+
+              <p class="text-secondary leading-relaxed m-0" style="font-size: 0.95rem;">
+                "<%= review.comment %>"
+              </p>
+            </div>
+
+            <% if (currUser && review.author && currUser._id.equals(review.author._id)) { %>
+              <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="text-end mt-3">
+                <button type="submit" class="btn btn-sm btn-link text-danger p-0 fw-semibold text-decoration-none">
+                  <i class="fa-solid fa-trash me-1"></i> Delete
+                </button>
+              </form>
+            <% } %>
+
+          </div>
+        <% } %>
+      </div>
+    <% } else { %>
+      <p class="text-muted">No reviews yet for this listing. Be the first to leave a review!</p>
+    <% } %>
+
+  </div>
+
+</div>
+
+<!-- ==========================================================================
+     5. FULLSCREEN MULTI-IMAGE LIGHTBOX GALLERY MODAL
+     ========================================================================== -->
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-0 rounded-4 overflow-hidden">
+      
+      <div class="modal-header border-0 pb-0">
+        <div class="small fw-semibold text-white-50">
+          <span id="lightbox-counter">1</span> / <%= listingImages.length %>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body text-center p-4 position-relative">
+        
+        <!-- Prev Button -->
+        <button type="button" class="btn btn-dark rounded-circle position-absolute top-50 start-0 translate-middle-y ms-3 p-3 z-3 shadow" onclick="changeLightbox(-1)">
+          <i class="fa-solid fa-chevron-left fs-4"></i>
+        </button>
+
+        <img id="lightbox-img" src="<%= primaryImg %>" class="img-fluid rounded-3 shadow-lg" style="max-height: 75vh; object-fit: contain;">
+
+        <!-- Next Button -->
+        <button type="button" class="btn btn-dark rounded-circle position-absolute top-50 end-0 translate-middle-y me-3 p-3 z-3 shadow" onclick="changeLightbox(1)">
+          <i class="fa-solid fa-chevron-right fs-4"></i>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const galleryImages = <%- JSON.stringify(listingImages.map(img => img.url)) %>;
+  let currentLightboxIndex = 0;
+
+  function openLightbox(index) {
+    currentLightboxIndex = index;
+    updateLightboxUI();
+    const modal = new bootstrap.Modal(document.getElementById("lightboxModal"));
+    modal.show();
+  }
+
+  function changeLightbox(direction) {
+    currentLightboxIndex = (currentLightboxIndex + direction + galleryImages.length) % galleryImages.length;
+    updateLightboxUI();
+  }
+
+  function updateLightboxUI() {
+    const imgElem = document.getElementById("lightbox-img");
+    const counterElem = document.getElementById("lightbox-counter");
+    if (imgElem) imgElem.src = galleryImages[currentLightboxIndex];
+    if (counterElem) counterElem.textContent = currentLightboxIndex + 1;
+  }
+
+  // Keyboard navigation for Lightbox
+  document.addEventListener("keydown", (e) => {
+    const modalElem = document.getElementById("lightboxModal");
+    if (modalElem && modalElem.classList.contains("show")) {
+      if (e.key === "ArrowLeft") changeLightbox(-1);
+      if (e.key === "ArrowRight") changeLightbox(1);
+    }
+  });
+</script>
+
+<!-- Razorpay Payment SDK Script & Booking JS -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="/js/booking.js"></script>
