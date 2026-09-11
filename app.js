@@ -129,6 +129,14 @@ app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 app.use("/", bookingRouter);
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Backend is healthy",
+    timestamp: new Date().toISOString()
+  });
+});
+
 // -------------------- Express 5 Catch-All 404 Middleware --------------------
 app.use((req, res, next) => {
   next(new ExpressError(404, "Page Not Found!"));
